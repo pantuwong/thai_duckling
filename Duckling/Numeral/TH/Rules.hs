@@ -34,69 +34,52 @@ ruleDozen :: Rule
 ruleDozen = Rule
   { name = "a dozen of"
   , pattern =
-    [ regex "(a )?dozens?( of)?"
+    [ regex "\d*( )?โหล" --is this correct?
     ]
   , prod = \_ -> integer 12 >>= withMultipliable >>= notOkForAnyTime
   }
 
 zeroNineteenMap :: HashMap Text Integer
 zeroNineteenMap = HashMap.fromList
-  [ ( "naught"   , 0 )
-  , ( "nil"      , 0 )
-  , ( "nought"   , 0 )
-  , ( "none"     , 0 )
-  , ( "zero"     , 0 )
-  , ( "zilch"    , 0 )
-  , ( "one"      , 1 )
-  , ( "two"      , 2 )
-  , ( "three"    , 3 )
-  , ( "four"     , 4 )
-  , ( "five"     , 5 )
-  , ( "six"      , 6 )
-  , ( "seven"    , 7 )
-  , ( "eight"    , 8 )
-  , ( "nine"     , 9 )
-  , ( "ten"      , 10 )
-  , ( "eleven"   , 11 )
-  , ( "twelve"   , 12 )
-  , ( "thirteen" , 13 )
-  , ( "fourteen" , 14 )
-  , ( "fifteen"  , 15 )
-  , ( "sixteen"  , 16 )
-  , ( "seventeen", 17 )
-  , ( "eighteen" , 18 )
-  , ( "nineteen" , 19 )
+  [ ( "ศูนย์"   , 0 )
+  , ( "หนึ่ง"      , 1 )
+  , ( "สอง"      , 2 )
+  , ( "สาม"    , 3 )
+  , ( "สี่"     , 4 )
+  , ( "ห้า"     , 5 )
+  , ( "หก"      , 6 )
+  , ( "เจ็ด"    , 7 )
+  , ( "แปด"    , 8 )
+  , ( "เก้า"     , 9 )
+  , ( "สิบ"      , 10 )
+  , ( "สิบเอ็ด"   , 11 )
+  , ( "สิบสอง"   , 12 )
+  , ( "สิบสาม" , 13 )
+  , ( "สิบสี่" , 14 )
+  , ( "สิบห้า"  , 15 )
+  , ( "สิบหก"  , 16 )
+  , ( "สิบเจ็ด", 17 )
+  , ( "สิบแปด" , 18 )
+  , ( "สิบเก้า" , 19 )
   ]
 
 informalMap :: HashMap Text Integer
 informalMap = HashMap.fromList
-  [ ( "single"     , 1 )
-  , ( "a couple"   , 2 )
-  , ( "a couple of", 2 )
-  , ( "couple"     , 2 )
-  , ( "couples"    , 2 )
-  , ( "couple of"  , 2 )
-  , ( "couples of" , 2 )
-  , ( "a pair"     , 2 )
-  , ( "a pair of"  , 2 )
-  , ( "pair"       , 2 )
-  , ( "pairs"      , 2 )
-  , ( "pair of"    , 2 )
-  , ( "pairs of"   , 2 )
-  , ( "a few"      , 3 )
-  , ( "few"        , 3 )
+  [ ( "หนึ่งเดียว", 1 )
+  , ( "คู่"   , 2 )
+  , ( "คู่ของ", 2 )
+  , ( "นิดหน่อย", 3 )
   ]
 
 ruleToNineteen :: Rule
 ruleToNineteen = Rule
-  { name = "integer (0..19)"
-  -- e.g. fourteen must be before four, otherwise four will always shadow fourteen
-  , pattern =
-    [ regex "(none|zilch|naught|nought|nil|zero|one|single|two|(a )?(pair|couple)s?( of)?|three|(a )?few|fourteen|four|fifteen|five|sixteen|six|seventeen|seven|eighteen|eight|nineteen|nine|ten|eleven|twelve|thirteen)"
+  { name = "integer (0..19)" 
+    , pattern =
+    [ regex "(ศูนย์|หนึ่ง|สอง|สาม|สี่|ห้า|หก|เจ็ด|แปด|เก้า|สิบ|สิบเอ็ด|สิบสอง|สิบสาม|สิบสี่|สิบห้า|สิบหก|สิบเจ็ด|สิบแปด|สิบเก้า)"
     ]
   , prod = \tokens -> case tokens of
       (Token RegexMatch (GroupMatch (match:_)):_) ->
-        let x = Text.toLower match in
+        let x = Text match in
         (HashMap.lookup x zeroNineteenMap >>= integer) <|>
         (HashMap.lookup x informalMap >>= integer >>= notOkForAnyTime)
       _ -> Nothing
@@ -104,42 +87,40 @@ ruleToNineteen = Rule
 
 tensMap :: HashMap Text Integer
 tensMap = HashMap.fromList
-  [ ( "twenty"  , 20 )
-  , ( "thirty"  , 30 )
-  , ( "forty"   , 40 )
-  , ( "fourty"  , 40 )
-  , ( "fifty"   , 50 )
-  , ( "sixty"   , 60 )
-  , ( "seventy" , 70 )
-  , ( "eighty"  , 80 )
-  , ( "ninety"  , 90 )
+  [ ( "ยี่สิบ"  , 20 )
+  , ( "สามสิบ"  , 30 )
+  , ( "สี่สิบ"   , 40 )
+  , ( "ห้าสิบ"  , 50 )
+  , ( "หกสิบ"   , 60 )
+  , ( "เจ็ดสิบ"   , 70 )
+  , ( "แปดสิบ" , 80 )
+  , ( "เก้าสิบ"  , 90 )
   ]
 
 ruleTens :: Rule
 ruleTens = Rule
   { name = "integer (20..90)"
   , pattern =
-    [ regex "(twenty|thirty|fou?rty|fifty|sixty|seventy|eighty|ninety)"
+    [ regex "(ยี่สิบ|สามสิบ|สี่สิบ|ห้าสิบ|หกสิบ|เจ็ดสิบ|แปดสิบ|เก้าสิบ)"
     ]
   , prod = \tokens -> case tokens of
       (Token RegexMatch (GroupMatch (match:_)):_) ->
-        HashMap.lookup (Text.toLower match) tensMap >>= integer
+        HashMap.lookup (Text match) tensMap >>= integer
       _ -> Nothing
   }
 
 rulePowersOfTen :: Rule
 rulePowersOfTen = Rule
   { name = "powers of tens"
-  , pattern = [regex "(hundred|thousand|lakh|million|crore|billion)s?"]
+  , pattern = [regex "(ร้อย|พัน|หมื่น|แสน|ล้าน|)?"]
   , prod = \tokens -> case tokens of
       (Token RegexMatch (GroupMatch (match : _)) : _) ->
-        case Text.toLower match of
-          "hundred" -> double 1e2 >>= withGrain 2 >>= withMultipliable
-          "thousand" -> double 1e3 >>= withGrain 3 >>= withMultipliable
-          "lakh" -> double 1e5 >>= withGrain 5 >>= withMultipliable
-          "million" -> double 1e6 >>= withGrain 6 >>= withMultipliable
-          "crore" -> double 1e7 >>= withGrain 7 >>= withMultipliable
-          "billion" -> double 1e9 >>= withGrain 9 >>= withMultipliable
+        case Text match of
+          "ร้อย" -> double 1e2 >>= withGrain 2 >>= withMultipliable
+          "พัน" -> double 1e3 >>= withGrain 3 >>= withMultipliable
+          "หมื่น" -> double 1e4 >>= withGrain 7 >>= withMultipliable
+          "แสน" -> double 1e5 >>= withGrain 5 >>= withMultipliable
+          "ล้าน" -> double 1e6 >>= withGrain 6 >>= withMultipliable
           _ -> Nothing
       _ -> Nothing
   }
